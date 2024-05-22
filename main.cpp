@@ -29,7 +29,7 @@ float dT[3] = {0.0, 0.0, 0.0};
 // ZOOM을 위한 변수
 float ViewSize = 50.0;
 
-float angle0 = 0.0, angle1 = 0.0, angle2 = 0.0, angle3 = 0.0;
+float angle0 = 0.0, angle1 = -20.0, angle2 = 0.0, angle3 = 10.0;
 // 함수선언
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 bool SetupPixelFormat();
@@ -472,22 +472,40 @@ void DrawScene()
 			glTranslatef(15.0, 0.0, 0.0);
 			glRotatef(angle3, 0.0, 0.0, 1.0);
 			// 삽(관절)
+			glScalef(1.5, 1.2, 1.0);
 			glPushMatrix();
 				glTranslatef(0.0, 0.0, 0.0);
 				glScalef(1.0, 1.0, 15.0);
 				SetMaterial(0.1, 0.1, 0.1);
 				glutSolidCube(1.0);
-				// 삽(짙은 회색)
-				
-				glTranslatef(0.5, 0.5, 0.0);
-				glScalef(4.0, 4.0, 1.0);
-				SetMaterial(1.0, 1.0, 0.0);
-				glutSolidCube(1.0);
+				// 삽 (짙은 회색)
+				// 가로
+				glPushMatrix();
+					glTranslatef(4.0, 0.0, 0.0);
+					glScalef(7.0, 1.0, 1.0);
+					SetMaterial(1.0, 1.0, 0.0);
+					glutSolidCube(1.0);
+				glPopMatrix();
+				// 세로
+				glPushMatrix();
+					glTranslatef(0.0, 3.5, 0.0);
+					glScalef(1.0, 6.0, 1.0);
+					SetMaterial(1.0, 1.0, 0.0);
+					glutSolidCube(1.0);
+				glPopMatrix();
+
+				// 외벽(내외 확인을 위해 우측 벽은 생략)
+				glScalef(1.0, 1.0, 1.0 / 15.0); // 사이즈 복구
+				glPushMatrix();
+					glTranslatef(3.5, 3.5, -7.0);
+					glScalef(8.0, 6.0, 1.0);
+					SetMaterial(0.1, 0.1, 0.1);
+					glutSolidCube(1.0);
+				glPopMatrix();
+
 			glPopMatrix();
 		glPopMatrix();
 	glPopMatrix();
-	
-	// 삽 추가
 	
 			
 	// 더블버퍼링을 위한 교환
