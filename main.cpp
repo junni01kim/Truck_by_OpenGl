@@ -29,7 +29,7 @@ float dT[3] = {0.0, 0.0, 0.0};
 // ZOOMÀ» À§ÇÑ º¯¼ö
 float ViewSize = 50.0;
 
-float angle0 = 0.0, angle1 = 0.0;
+float angle0 = 0.0, angle1 = 0.0, angle2 = 0.0, angle3 = 0.0;
 // ÇÔ¼ö¼±¾ð
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 bool SetupPixelFormat();
@@ -91,9 +91,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			if (wParam == '3')
 				angle1 -= 2.0;
-
 			if (wParam == '4')
 				angle1 += 2.0;
+			
+			if (wParam == '5')
+				angle2 -= 2.0;
+			if (wParam == '6')
+				angle2 += 2.0;
+
+			if (wParam == '7')
+				angle3 -= 2.0;
+			if (wParam == '8')
+				angle3 += 2.0;
 
 			InvalidateRect(hWnd, NULL, false);
 		}
@@ -344,20 +353,13 @@ void DrawScene()
 
 
 	// Å×½ºÆ® °´Ã¼ ±×¸®±â(ºÒµµÀú)
-	// 
-	//¿¹Á¦
-	//glTranslatef(0.0, 8.0, 0.0);
-	//glPushMatrix();
-	//	glScalef(6.0, 10.0, 6.0);
-	//	SetMaterial(0.0, 1.0, 0.0);
-	//	glutSolidCube(1.0);
-	//glPopMatrix();
 	
+	// ±âº» »ö»ó(³ë¶û)
+	SetMaterial(1.0, 1.0, 0.0);
 	// Æ®·° Æ®··Å©
 	glPushMatrix();
 		glTranslatef(-5.0, 12.0, 0.0);
 		glScalef(15.0, 14.0, 15.0);
-		SetMaterial(0.0, 1.0, 0.0);
 		glutSolidCube(1.0);
 	glPopMatrix();
 
@@ -366,66 +368,125 @@ void DrawScene()
 		// ¿Üº®
 		glTranslatef(6.0, 11.0, 0.0);
 		glScalef(8.0, 12.0, 15.0);
-		SetMaterial(0.0, 1.0, 0.0);
 		glutSolidCube(1.0);
 
 		// À¯¸®(ÇÏ´Ã»ö)
 		glTranslatef(0.6, 0.1, 0.0);
 		glScalef(0.3, 0.75, 0.9);
-		SetMaterial(0.0, 1.0, 0.0);
+		SetMaterial(0.0, 3.5, 3.5);
 		glutSolidCube(1.0);
 
 		glTranslatef(0.0, -0.6, 0.0);
 		glScalef(1.5, 0.4, 1.1);
-		SetMaterial(0.0, 1.0, 0.0);
+		SetMaterial(1.0, 1.0, 0.0);
 		glutSolidCube(1.0);
 	glPopMatrix();
 
-	// ¾Õ ¹ÙÄû
+	//¹ÙÄû(Â£Àº È¸»ö)
+	// angle2¿¡ °üÇÑ È¸Àü
 	glPushMatrix();
-		// ¹ÙÄû ¿ì
-		glTranslatef(7.0, 5.0, 7.5);
-		glScalef(3.0, 3.0, 1.0);
-		SetMaterial(0.0, 1.0, 0.0);
-		glutSolidCube(1.0);
+		SetMaterial(0.1, 0.1, 0.1);
+		// ¾Õ ¹ÙÄû
+		glPushMatrix();
+			glTranslatef(7.0, 5.0, 0);
+			glScalef(1.0, 1.0, 1.0);
+			// ¹ÙÄû ¿ì
+			glPushMatrix();
+				glTranslatef(0.0, 0.0, 7.5);
+				glRotatef(angle2, 0.0, 1.0, 0.0);
+				glutSolidTorus(1.0, 2.0, 100, 100);
+				// ÈÙ
+				glScalef(3.0, 3.0, 1.0);
+				glutSolidCube(1.0);
+			glPopMatrix();
 
-		// ¹ÙÄû ÁÂ
-		glTranslatef(0.0, 0.0, -15);
-		SetMaterial(0.0, 1.0, 0.0);
-		glutSolidCube(1.0);
+			// ¹ÙÄû ÁÂ
+			glPushMatrix();
+				glTranslatef(0.0, 0.0, -7.5);
+				glRotatef(angle2, 0.0, 1.0, 0.0);
+				glutSolidTorus(1.0, 2.0, 100, 100);
+				// ÈÙ
+				glScalef(3.0, 3.0, 1.0);
+				glutSolidCube(1.0);
+			glPopMatrix();
+		glPopMatrix();
 	glPopMatrix();
 
-	// µÞ ¹ÙÄû
+	// angle0¿¡ °üÇÑ È¸Àü
 	glPushMatrix();
-		// ¹ÙÄû ¿ì
-		glTranslatef(-7.0, 5.0, 7.5);
-		glScalef(3.0, 3.0, 1.0);
-		SetMaterial(0.0, 1.0, 0.0);
-		glutSolidCube(1.0);
+		SetMaterial(0.1, 0.1, 0.1);
+		glTranslatef(-7.0, 5.0, 0.0);
+		glRotatef(angle0, 0.0, 0.0, 1.0);
+		// µÞ ¹ÙÄû ¿ì(°üÀý)
+		glPushMatrix();
+			glTranslatef(0.0, 0.0, 7.5);
+			glutSolidTorus(1.0, 2.0, 100, 100);
+			// ÈÙ(ÀÎµ¥ È¸ÀüÇÏ´Â °ÍÀ» È®ÀÎÇÏ±â À§ÇØ ¿ìÃø ¸¸ Å©±â Ãà¼Ò)
+			glScalef(3.0, 3.0, 1.0);
+			glutSolidCube(0.3);
+		glPopMatrix();
 
-		// ¹ÙÄû ÁÂ
-		glTranslatef(0.0, 0.0, -15);
-		SetMaterial(0.0, 1.0, 0.0);
-		glutSolidCube(1.0);
+		// µÞ ¹ÙÄû ÁÂ(°üÀý)
+		glPushMatrix();
+			glTranslatef(0.0, 0.0, -7.5);
+			glutSolidTorus(1.0, 2.0, 100, 100);
+			// ÈÙ
+			glScalef(3.0, 3.0, 1.0);
+			glutSolidCube(1.0);
+		glPopMatrix();
 	glPopMatrix();
 
-	// ÆÈ ¿ì(°üÀý)
+	// angle1¿¡ °üÇÑ È¸Àü
 	glPushMatrix();
-		glTranslatef(5.0, 10.0, 8.5);
-		glScalef(2.0, 2.0, 2.0);
-		SetMaterial(0.0, 1.0, 0.0);
-		glutSolidCube(1.0);
-	glPopMatrix();
+		glTranslatef(5.0, 10.0, 0.0);
+		glRotatef(angle1, 0.0, 0.0, 1.0);
+		// ÆÈ ¿ì(°üÀý)
+		glPushMatrix();
+			glTranslatef(0.0, 0.0, 8.5);
+			glScalef(2.0, 2.0, 2.0);
+			SetMaterial(0.1, 0.1, 0.1);
+			glutSolidCube(1.0);
+			// ÆÈ¶Ò Ãß°¡
+			glTranslatef(4.0, 0.0, 0.0);
+			glScalef(7.5, 1.0, 1.0);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+		glPopMatrix();
 
-	// ÆÈ ÁÂ(°üÀý, ½ÇÁ¦ ¿ªÇÒ X)
-	glPushMatrix();
-		glTranslatef(5.0, 10.0, -8.5);
-		glScalef(2.0, 2.0, 2.0);
-		SetMaterial(0.0, 1.0, 0.0);
-		glutSolidCube(1.0);
+		// ÆÈ ÁÂ(°üÀý)
+		glPushMatrix();
+			glTranslatef(0.0, 0.0, -8.5);
+			glScalef(2.0, 2.0, 2.0);
+			SetMaterial(0.1, 0.1, 0.1);
+			glutSolidCube(1.0);
+			// ÆÈ¶Ò Ãß°¡
+			glTranslatef(4.0, 0.0, 0.0);
+			glScalef(7.5, 1.0, 1.0);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+		glPopMatrix();
+
+
+		// angle3¿¡ °üÇÑ È¸Àü
+		glPushMatrix();
+			glTranslatef(15.0, 0.0, 0.0);
+			glRotatef(angle3, 0.0, 0.0, 1.0);
+			// »ð(°üÀý)
+			glPushMatrix();
+				glTranslatef(0.0, 0.0, 0.0);
+				glScalef(1.0, 1.0, 15.0);
+				SetMaterial(0.1, 0.1, 0.1);
+				glutSolidCube(1.0);
+				// »ð(Â£Àº È¸»ö)
+				
+				glTranslatef(0.5, 0.5, 0.0);
+				glScalef(4.0, 4.0, 1.0);
+				SetMaterial(1.0, 1.0, 0.0);
+				glutSolidCube(1.0);
+			glPopMatrix();
+		glPopMatrix();
 	glPopMatrix();
 	
-	// ÆÈ¶Ò Ãß°¡
 	// »ð Ãß°¡
 	
 			
