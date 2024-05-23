@@ -29,7 +29,15 @@ float dT[3] = {0.0, 0.0, 0.0};
 // ZOOM을 위한 변수
 float ViewSize = 50.0;
 
-float angle0 = 0.0, angle1 = -20.0, angle2 = 0.0, angle3 = 10.0;
+float backWheelAngle = 0.0, armAngle = -20.0, frontWheelAngle = 0.0, shovelAngle = 10.0;
+
+#define BUFFER_SIZE 64
+GLuint SelectBuffer[BUFFER_SIZE];
+#define BACKWHEELANGLE 10
+#define ARMANGLE 11
+#define FRONTWHEELANGLE 12
+#define SHOVELANGLE 12
+
 // 함수선언
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 bool SetupPixelFormat();
@@ -43,6 +51,8 @@ void InitOpenGL();
 void GetSphereCoord(int x, int y, float *px, float *py, float *pz);
 void DrawFloor();
 void SetMaterial(float r, float g, float b);
+void Picking(int x, int y);
+void DrawObject(GLenum mode);
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
@@ -85,24 +95,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 		{
 			if (wParam == '1')
-				angle0 -= 2.0;
+				backWheelAngle -= 2.0;
 			if (wParam == '2')
-				angle0 += 2.0;
+				backWheelAngle += 2.0;
 
 			if (wParam == '3')
-				angle1 -= 2.0;
+				armAngle -= 2.0;
 			if (wParam == '4')
-				angle1 += 2.0;
+				armAngle += 2.0;
 			
 			if (wParam == '5')
-				angle2 -= 2.0;
+				frontWheelAngle -= 2.0;
 			if (wParam == '6')
-				angle2 += 2.0;
+				frontWheelAngle += 2.0;
 
 			if (wParam == '7')
-				angle3 -= 2.0;
+				shovelAngle -= 2.0;
 			if (wParam == '8')
-				angle3 += 2.0;
+				shovelAngle += 2.0;
 
 			InvalidateRect(hWnd, NULL, false);
 		}
@@ -173,28 +183,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam & MK_LBUTTON)
 		{
-			float px, py, pz;
-			float qx, qy, qz;
+			if (SelectBuffer[3] == 0) {
+				float px, py, pz;
+				float qx, qy, qz;
 
-			GetSphereCoord(StartPt[0], StartPt[1], &px, &py, &pz);
-			GetSphereCoord(x, y, &qx, &qy, &qz);
+				GetSphereCoord(StartPt[0], StartPt[1], &px, &py, &pz);
+				GetSphereCoord(x, y, &qx, &qy, &qz);
 
-			Axis[0] = py * qz - pz * qy;
-			Axis[1] = pz * qx - px * qz;
-			Axis[2] = px * qy - py * qx;
+				Axis[0] = py * qz - pz * qy;
+				Axis[1] = pz * qx - px * qz;
+				Axis[2] = px * qy - py * qx;
 
-			float len = Axis[0] * Axis[0] + Axis[1] * Axis[1] + Axis[2] * Axis[2];
-			if (len < 0.0001)
-			{
-				Axis[0] = 1.0;
-				Axis[1] = 0.0;
-				Axis[2] = 0.0;
-				Angle = 0.0;
+				float len = Axis[0] * Axis[0] + Axis[1] * Axis[1] + Axis[2] * Axis[2];
+				if (len < 0.0001)
+				{
+					Axis[0] = 1.0;
+					Axis[1] = 0.0;
+					Axis[2] = 0.0;
+					Angle = 0.0;
+				}
+				else
+				{
+					Angle = px * qx + py * qy + pz * qz;
+					Angle = acos(Angle) * 180.0f / 3.141592f;
+				}
 			}
-			else
-			{
-				Angle = px * qx + py * qy + pz * qz;
-				Angle = acos(Angle) * 180.0f / 3.141592f;
+			else if (SelectBuffer[3] == 10) {
+				backWheelAngle -= -0.2 * (x - StartPt[0]);
+			}
+			else if (SelectBuffer[3] == 11) {
+				frontWheelAngle -= -0.2 * (x - StartPt[0]);
+			}
+			else if (SelectBuffer[3] == 12) {
+				armAngle -= -0.2 * (x - StartPt[0]);
+			}
+			else if (SelectBuffer[3] == 13) {
+				shovelAngle -= -0.2 * (x - StartPt[0]);
 			}
 		}
 
@@ -219,6 +243,360 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+void DrawObject(GLenum mode) {
+	if (mode == GL_SELECT) {
+		// 테스트 객체 그리기(불도저)
+
+	// 기본 색상(노랑)
+		SetMaterial(1.0, 1.0, 0.0);
+		// 트럭 트렁크
+		glPushMatrix();
+			glTranslatef(-5.0, 12.0, 0.0);
+			glScalef(15.0, 14.0, 15.0);
+			glutSolidCube(1.0);
+		glPopMatrix();
+
+		// 트럭 머리
+		glPushMatrix();
+			// 외벽
+			glTranslatef(6.0, 11.0, 0.0);
+			glScalef(8.0, 12.0, 15.0);
+			glutSolidCube(1.0);
+
+			// 유리(하늘색)
+			glTranslatef(0.6, 0.1, 0.0);
+			glScalef(0.3, 0.75, 0.9);
+			SetMaterial(0.0, 3.5, 3.5);
+			glutSolidCube(1.0);
+
+			glTranslatef(0.0, -0.6, 0.0);
+			glScalef(1.5, 0.4, 1.1);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+		glPopMatrix();
+
+		//바퀴(짙은 회색)
+		// angle2에 관한 회전
+		glPushMatrix();
+		SetMaterial(0.1, 0.1, 0.1);
+		// 앞 바퀴
+		glPushMatrix();
+		glTranslatef(7.0, 5.0, 0);
+		glScalef(1.0, 1.0, 1.0);
+		// 바퀴 우
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, 7.5);
+		glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
+		glutSolidTorus(1.0, 2.0, 100, 100);
+		// 휠
+		glScalef(3.0, 3.0, 1.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+
+		// 바퀴 좌
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, -7.5);
+		glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
+		glutSolidTorus(1.0, 2.0, 100, 100);
+		// 휠
+		glScalef(3.0, 3.0, 1.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+		glPopMatrix();
+		glPopMatrix();
+
+		// angle0에 관한 회전
+		glPushMatrix();
+		SetMaterial(0.1, 0.1, 0.1);
+		glTranslatef(-7.0, 5.0, 0.0);
+		glRotatef(backWheelAngle, 0.0, 0.0, 1.0);
+		// 뒷 바퀴 우(관절)
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, 7.5);
+		glutSolidTorus(1.0, 2.0, 100, 100);
+		// 휠(인데 회전하는 것을 확인하기 위해 우측 만 크기 축소)
+		glScalef(3.0, 3.0, 1.0);
+		glutSolidCube(0.3);
+		glPopMatrix();
+
+		// 뒷 바퀴 좌(관절)
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, -7.5);
+		glutSolidTorus(1.0, 2.0, 100, 100);
+		// 휠
+		glScalef(3.0, 3.0, 1.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+		glPopMatrix();
+
+		// angle1에 관한 회전
+		glPushMatrix();
+		glTranslatef(5.0, 10.0, 0.0);
+		glRotatef(armAngle, 0.0, 0.0, 1.0);
+		// 팔 우(관절)
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, 8.5);
+		glScalef(2.0, 2.0, 2.0);
+		SetMaterial(0.1, 0.1, 0.1);
+		glutSolidCube(1.0);
+		// 팔뚝 추가
+		glTranslatef(4.0, 0.0, 0.0);
+		glScalef(7.5, 1.0, 1.0);
+		SetMaterial(1.0, 1.0, 0.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+
+		// 팔 좌(관절)
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, -8.5);
+		glScalef(2.0, 2.0, 2.0);
+		SetMaterial(0.1, 0.1, 0.1);
+		glutSolidCube(1.0);
+		// 팔뚝 추가
+		glTranslatef(4.0, 0.0, 0.0);
+		glScalef(7.5, 1.0, 1.0);
+		SetMaterial(1.0, 1.0, 0.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+
+
+		// angle3에 관한 회전
+		glPushMatrix();
+		glTranslatef(15.0, 0.0, 0.0);
+		glRotatef(shovelAngle, 0.0, 0.0, 1.0);
+		// 삽(관절)
+		glScalef(1.5, 1.2, 1.0);
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, 0.0);
+		glScalef(1.0, 1.0, 15.0);
+		SetMaterial(0.1, 0.1, 0.1);
+		glutSolidCube(1.0);
+		// 삽 (짙은 회색)
+		// 가로
+		glPushMatrix();
+		glTranslatef(4.0, 0.0, 0.0);
+		glScalef(7.0, 1.0, 1.0);
+		SetMaterial(1.0, 1.0, 0.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+		// 세로
+		glPushMatrix();
+		glTranslatef(0.0, 3.5, 0.0);
+		glScalef(1.0, 6.0, 1.0);
+		SetMaterial(1.0, 1.0, 0.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+
+		// 외벽(내외 확인을 위해 우측 벽은 생략)
+		glScalef(1.0, 1.0, 1.0 / 15.0); // 사이즈 복구
+		glPushMatrix();
+		glTranslatef(3.5, 3.5, -7.0);
+		glScalef(8.0, 6.0, 1.0);
+		SetMaterial(0.1, 0.1, 0.1);
+		glutSolidCube(1.0);
+		glPopMatrix();
+
+		glPopMatrix();
+		glPopMatrix();
+		glPopMatrix();
+	}
+	else {
+		// 테스트 객체 그리기(불도저)
+
+			// 기본 색상(노랑)
+			SetMaterial(1.0, 1.0, 0.0);
+			// 트럭 트렁크
+			glPushMatrix();
+			glTranslatef(-5.0, 12.0, 0.0);
+			glScalef(15.0, 14.0, 15.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+
+			// 트럭 머리
+			glPushMatrix();
+			// 외벽
+			glTranslatef(6.0, 11.0, 0.0);
+			glScalef(8.0, 12.0, 15.0);
+			glutSolidCube(1.0);
+
+			// 유리(하늘색)
+			glTranslatef(0.6, 0.1, 0.0);
+			glScalef(0.3, 0.75, 0.9);
+			SetMaterial(0.0, 3.5, 3.5);
+			glutSolidCube(1.0);
+
+			glTranslatef(0.0, -0.6, 0.0);
+			glScalef(1.5, 0.4, 1.1);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+
+			//바퀴(짙은 회색)
+			// angle2에 관한 회전
+			glPushMatrix();
+			SetMaterial(0.1, 0.1, 0.1);
+			// 앞 바퀴
+			glPushMatrix();
+			glTranslatef(7.0, 5.0, 0);
+			glScalef(1.0, 1.0, 1.0);
+			// 바퀴 우
+			glPushMatrix();
+			glTranslatef(0.0, 0.0, 7.5);
+			glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
+			glutSolidTorus(1.0, 2.0, 100, 100);
+			// 휠
+			glScalef(3.0, 3.0, 1.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+
+			// 바퀴 좌
+			glPushMatrix();
+			glTranslatef(0.0, 0.0, -7.5);
+			glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
+			glutSolidTorus(1.0, 2.0, 100, 100);
+			// 휠
+			glScalef(3.0, 3.0, 1.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+			glPopMatrix();
+			glPopMatrix();
+
+			// angle0에 관한 회전
+			glPushMatrix();
+			SetMaterial(0.1, 0.1, 0.1);
+			glTranslatef(-7.0, 5.0, 0.0);
+			glRotatef(backWheelAngle, 0.0, 0.0, 1.0);
+			// 뒷 바퀴 우(관절)
+			glPushMatrix();
+			glTranslatef(0.0, 0.0, 7.5);
+			glutSolidTorus(1.0, 2.0, 100, 100);
+			// 휠(인데 회전하는 것을 확인하기 위해 우측 만 크기 축소)
+			glScalef(3.0, 3.0, 1.0);
+			glutSolidCube(0.3);
+			glPopMatrix();
+
+			// 뒷 바퀴 좌(관절)
+			glPushMatrix();
+			glTranslatef(0.0, 0.0, -7.5);
+			glutSolidTorus(1.0, 2.0, 100, 100);
+			// 휠
+			glScalef(3.0, 3.0, 1.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+			glPopMatrix();
+
+			// angle1에 관한 회전
+			glPushMatrix();
+			glTranslatef(5.0, 10.0, 0.0);
+			glRotatef(armAngle, 0.0, 0.0, 1.0);
+			// 팔 우(관절)
+			glPushMatrix();
+			glTranslatef(0.0, 0.0, 8.5);
+			glScalef(2.0, 2.0, 2.0);
+			SetMaterial(0.1, 0.1, 0.1);
+			glutSolidCube(1.0);
+			// 팔뚝 추가
+			glTranslatef(4.0, 0.0, 0.0);
+			glScalef(7.5, 1.0, 1.0);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+
+			// 팔 좌(관절)
+			glPushMatrix();
+			glTranslatef(0.0, 0.0, -8.5);
+			glScalef(2.0, 2.0, 2.0);
+			SetMaterial(0.1, 0.1, 0.1);
+			glutSolidCube(1.0);
+			// 팔뚝 추가
+			glTranslatef(4.0, 0.0, 0.0);
+			glScalef(7.5, 1.0, 1.0);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+
+
+			// angle3에 관한 회전
+			glPushMatrix();
+			glTranslatef(15.0, 0.0, 0.0);
+			glRotatef(shovelAngle, 0.0, 0.0, 1.0);
+			// 삽(관절)
+			glScalef(1.5, 1.2, 1.0);
+			glPushMatrix();
+			glTranslatef(0.0, 0.0, 0.0);
+			glScalef(1.0, 1.0, 15.0);
+			SetMaterial(0.1, 0.1, 0.1);
+			glutSolidCube(1.0);
+			// 삽 (짙은 회색)
+			// 가로
+			glPushMatrix();
+			glTranslatef(4.0, 0.0, 0.0);
+			glScalef(7.0, 1.0, 1.0);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+			// 세로
+			glPushMatrix();
+			glTranslatef(0.0, 3.5, 0.0);
+			glScalef(1.0, 6.0, 1.0);
+			SetMaterial(1.0, 1.0, 0.0);
+			glutSolidCube(1.0);
+			glPopMatrix();
+
+			// 외벽(내외 확인을 위해 우측 벽은 생략)
+			glScalef(1.0, 1.0, 1.0 / 15.0); // 사이즈 복구
+			glPushMatrix();
+			glTranslatef(3.5, 3.5, -7.0);
+			glScalef(8.0, 6.0, 1.0);
+			SetMaterial(0.1, 0.1, 0.1);
+			glutSolidCube(1.0);
+			glPopMatrix();
+
+			glPopMatrix();
+			glPopMatrix();
+			glPopMatrix();
+	}
+}
+
+void Picking(int x, int y)
+{
+	int result, viewport[4];
+
+	// 1. 선택버퍼 지정
+	memset(SelectBuffer, 0, BUFFER_SIZE);
+	glSelectBuffer(BUFFER_SIZE, SelectBuffer);
+
+	// 2. 렌더링 모드 변경
+	glRenderMode(GL_SELECT);
+
+	// 3. 네임스택 초기화 및 0입력
+	glInitNames();
+	glPushName(0);
+
+	// 4. 투영행렬 선택 및 이전 투영행렬 저장 후, 단위행렬 설정
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	// 5. 뷰포트 변환 정보를 얻어, 선택을 위한 투영행렬 생성 및 현재 행렬(단위 행렬)에 곱하기
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	gluPickMatrix((double)x, (double)(viewport[3] - y), 2.0, 2.0, viewport);
+
+	// 6. 투영변환 행렬 생성 및 현재 행렬에 곱하기
+	glOrtho(-ViewSize, ViewSize, -ViewSize, ViewSize, -1000.0f, 1000.0f);
+
+
+	// 7. 아이디를 네임스택에 저장하면서 객체그리기
+	DrawObject(GL_SELECT);
+
+	// 8. 투영 행렬 선택 및 이전 투영행렬 복원
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	// 9. 렌더링 모드 변경, 선택된 객체의 개수 반환
+	result = glRenderMode(GL_RENDER);
 }
 
 bool SetupPixelFormat() 
@@ -350,163 +728,7 @@ void DrawScene()
 
 	// 바닥그리기
 	DrawFloor();	
-
-
-	// 테스트 객체 그리기(불도저)
-	
-	// 기본 색상(노랑)
-	SetMaterial(1.0, 1.0, 0.0);
-	// 트럭 트렁크
-	glPushMatrix();
-		glTranslatef(-5.0, 12.0, 0.0);
-		glScalef(15.0, 14.0, 15.0);
-		glutSolidCube(1.0);
-	glPopMatrix();
-
-	// 트럭 머리
-	glPushMatrix();
-		// 외벽
-		glTranslatef(6.0, 11.0, 0.0);
-		glScalef(8.0, 12.0, 15.0);
-		glutSolidCube(1.0);
-
-		// 유리(하늘색)
-		glTranslatef(0.6, 0.1, 0.0);
-		glScalef(0.3, 0.75, 0.9);
-		SetMaterial(0.0, 3.5, 3.5);
-		glutSolidCube(1.0);
-
-		glTranslatef(0.0, -0.6, 0.0);
-		glScalef(1.5, 0.4, 1.1);
-		SetMaterial(1.0, 1.0, 0.0);
-		glutSolidCube(1.0);
-	glPopMatrix();
-
-	//바퀴(짙은 회색)
-	// angle2에 관한 회전
-	glPushMatrix();
-		SetMaterial(0.1, 0.1, 0.1);
-		// 앞 바퀴
-		glPushMatrix();
-			glTranslatef(7.0, 5.0, 0);
-			glScalef(1.0, 1.0, 1.0);
-			// 바퀴 우
-			glPushMatrix();
-				glTranslatef(0.0, 0.0, 7.5);
-				glRotatef(angle2, 0.0, 1.0, 0.0);
-				glutSolidTorus(1.0, 2.0, 100, 100);
-				// 휠
-				glScalef(3.0, 3.0, 1.0);
-				glutSolidCube(1.0);
-			glPopMatrix();
-
-			// 바퀴 좌
-			glPushMatrix();
-				glTranslatef(0.0, 0.0, -7.5);
-				glRotatef(angle2, 0.0, 1.0, 0.0);
-				glutSolidTorus(1.0, 2.0, 100, 100);
-				// 휠
-				glScalef(3.0, 3.0, 1.0);
-				glutSolidCube(1.0);
-			glPopMatrix();
-		glPopMatrix();
-	glPopMatrix();
-
-	// angle0에 관한 회전
-	glPushMatrix();
-		SetMaterial(0.1, 0.1, 0.1);
-		glTranslatef(-7.0, 5.0, 0.0);
-		glRotatef(angle0, 0.0, 0.0, 1.0);
-		// 뒷 바퀴 우(관절)
-		glPushMatrix();
-			glTranslatef(0.0, 0.0, 7.5);
-			glutSolidTorus(1.0, 2.0, 100, 100);
-			// 휠(인데 회전하는 것을 확인하기 위해 우측 만 크기 축소)
-			glScalef(3.0, 3.0, 1.0);
-			glutSolidCube(0.3);
-		glPopMatrix();
-
-		// 뒷 바퀴 좌(관절)
-		glPushMatrix();
-			glTranslatef(0.0, 0.0, -7.5);
-			glutSolidTorus(1.0, 2.0, 100, 100);
-			// 휠
-			glScalef(3.0, 3.0, 1.0);
-			glutSolidCube(1.0);
-		glPopMatrix();
-	glPopMatrix();
-
-	// angle1에 관한 회전
-	glPushMatrix();
-		glTranslatef(5.0, 10.0, 0.0);
-		glRotatef(angle1, 0.0, 0.0, 1.0);
-		// 팔 우(관절)
-		glPushMatrix();
-			glTranslatef(0.0, 0.0, 8.5);
-			glScalef(2.0, 2.0, 2.0);
-			SetMaterial(0.1, 0.1, 0.1);
-			glutSolidCube(1.0);
-			// 팔뚝 추가
-			glTranslatef(4.0, 0.0, 0.0);
-			glScalef(7.5, 1.0, 1.0);
-			SetMaterial(1.0, 1.0, 0.0);
-			glutSolidCube(1.0);
-		glPopMatrix();
-
-		// 팔 좌(관절)
-		glPushMatrix();
-			glTranslatef(0.0, 0.0, -8.5);
-			glScalef(2.0, 2.0, 2.0);
-			SetMaterial(0.1, 0.1, 0.1);
-			glutSolidCube(1.0);
-			// 팔뚝 추가
-			glTranslatef(4.0, 0.0, 0.0);
-			glScalef(7.5, 1.0, 1.0);
-			SetMaterial(1.0, 1.0, 0.0);
-			glutSolidCube(1.0);
-		glPopMatrix();
-
-
-		// angle3에 관한 회전
-		glPushMatrix();
-			glTranslatef(15.0, 0.0, 0.0);
-			glRotatef(angle3, 0.0, 0.0, 1.0);
-			// 삽(관절)
-			glScalef(1.5, 1.2, 1.0);
-			glPushMatrix();
-				glTranslatef(0.0, 0.0, 0.0);
-				glScalef(1.0, 1.0, 15.0);
-				SetMaterial(0.1, 0.1, 0.1);
-				glutSolidCube(1.0);
-				// 삽 (짙은 회색)
-				// 가로
-				glPushMatrix();
-					glTranslatef(4.0, 0.0, 0.0);
-					glScalef(7.0, 1.0, 1.0);
-					SetMaterial(1.0, 1.0, 0.0);
-					glutSolidCube(1.0);
-				glPopMatrix();
-				// 세로
-				glPushMatrix();
-					glTranslatef(0.0, 3.5, 0.0);
-					glScalef(1.0, 6.0, 1.0);
-					SetMaterial(1.0, 1.0, 0.0);
-					glutSolidCube(1.0);
-				glPopMatrix();
-
-				// 외벽(내외 확인을 위해 우측 벽은 생략)
-				glScalef(1.0, 1.0, 1.0 / 15.0); // 사이즈 복구
-				glPushMatrix();
-					glTranslatef(3.5, 3.5, -7.0);
-					glScalef(8.0, 6.0, 1.0);
-					SetMaterial(0.1, 0.1, 0.1);
-					glutSolidCube(1.0);
-				glPopMatrix();
-
-			glPopMatrix();
-		glPopMatrix();
-	glPopMatrix();
-	
+	DrawObject(GL_RENDER);
 			
 	// 더블버퍼링을 위한 교환
 	SwapBuffers(hDC);
