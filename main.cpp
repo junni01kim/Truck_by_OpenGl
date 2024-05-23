@@ -36,7 +36,8 @@ GLuint SelectBuffer[BUFFER_SIZE];
 #define BACKWHEELANGLE 10
 #define ARMANGLE 11
 #define FRONTWHEELANGLE 12
-#define SHOVELANGLE 12
+#define SHOVELANGLE 13
+#define BODY 14
 
 // 함수선언
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -160,6 +161,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		Picking(StartPt[0], StartPt[1]);
 		InvalidateRect(hWnd, NULL, false);
 		break;
+
 	case WM_RBUTTONDOWN:
 		StartPt[0] = LOWORD(lParam);
 		StartPt[1] = HIWORD(lParam);
@@ -213,17 +215,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					Angle = acos(Angle) * 180.0f / 3.141592f;
 				}
 			}
-			else if (SelectBuffer[3] == 10) {
+			else if (SelectBuffer[3] == BACKWHEELANGLE) {
 				backWheelAngle -= -0.2 * (x - StartPt[0]);
 			}
-			else if (SelectBuffer[3] == 11) {
-				frontWheelAngle -= -0.2 * (x - StartPt[0]);
-			}
-			else if (SelectBuffer[3] == 12) {
+			else if (SelectBuffer[3] == ARMANGLE) {
 				armAngle -= -0.2 * (x - StartPt[0]);
 			}
-			else if (SelectBuffer[3] == 13) {
+			else if (SelectBuffer[3] == FRONTWHEELANGLE) {
+				frontWheelAngle -= -0.2 * (x - StartPt[0]);
+			}
+			else if (SelectBuffer[3] == SHOVELANGLE) {
 				shovelAngle -= -0.2 * (x - StartPt[0]);
+			}
+			else if (SelectBuffer[3] == BODY) {
+				// TODO()
 			}
 		}
 
@@ -253,7 +258,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 void DrawObject(GLenum mode) {
 	if (mode == GL_SELECT) {
 		// 테스트 객체 그리기(불도저)
-
+		glLoadName(BODY);
 		// 기본 색상(노랑)
 		SetMaterial(1.0, 1.0, 0.0);
 		// 트럭 트렁크
@@ -284,6 +289,7 @@ void DrawObject(GLenum mode) {
 
 		//바퀴(짙은 회색)
 		// angle2에 관한 회전
+		glLoadName(FRONTWHEELANGLE);
 		glPushMatrix();
 			SetMaterial(0.1, 0.1, 0.1);
 			// 앞 바퀴
@@ -292,7 +298,6 @@ void DrawObject(GLenum mode) {
 				glScalef(1.0, 1.0, 1.0);
 				// 바퀴 우
 				glPushMatrix();
-					glLoadName(FRONTWHEELANGLE);
 					glTranslatef(0.0, 0.0, 7.5);
 					glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
 					glutSolidTorus(1.0, 2.0, 100, 100);
@@ -303,7 +308,6 @@ void DrawObject(GLenum mode) {
 
 				// 바퀴 좌
 				glPushMatrix();
-					glLoadName(FRONTWHEELANGLE);
 					glTranslatef(0.0, 0.0, -7.5);
 					glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
 					glutSolidTorus(1.0, 2.0, 100, 100);
@@ -315,13 +319,13 @@ void DrawObject(GLenum mode) {
 		glPopMatrix();
 
 		// angle0에 관한 회전
+		glLoadName(BACKWHEELANGLE);
 		glPushMatrix();
 			SetMaterial(0.1, 0.1, 0.1);
 			glTranslatef(-7.0, 5.0, 0.0);
 			glRotatef(backWheelAngle, 0.0, 0.0, 1.0);
 			// 뒷 바퀴 우(관절)
 			glPushMatrix();
-				glLoadName(BACKWHEELANGLE);
 				glTranslatef(0.0, 0.0, 7.5);
 				glutSolidTorus(1.0, 2.0, 100, 100);
 				// 휠(인데 회전하는 것을 확인하기 위해 우측 만 크기 축소)
@@ -331,7 +335,6 @@ void DrawObject(GLenum mode) {
 
 			// 뒷 바퀴 좌(관절)
 			glPushMatrix();
-				glLoadName(BACKWHEELANGLE);
 				glTranslatef(0.0, 0.0, -7.5);
 				glutSolidTorus(1.0, 2.0, 100, 100);
 				// 휠
@@ -342,11 +345,11 @@ void DrawObject(GLenum mode) {
 
 		// angle1에 관한 회전
 		glPushMatrix();
+			glLoadName(ARMANGLE);
 			glTranslatef(5.0, 10.0, 0.0);
 			glRotatef(armAngle, 0.0, 0.0, 1.0);
 			// 팔 우(관절)
 			glPushMatrix();
-				glLoadName(ARMANGLE);
 				glTranslatef(0.0, 0.0, 8.5);
 				glScalef(2.0, 2.0, 2.0);
 				SetMaterial(0.1, 0.1, 0.1);
@@ -360,7 +363,6 @@ void DrawObject(GLenum mode) {
 
 			// 팔 좌(관절)
 			glPushMatrix();
-				glLoadName(ARMANGLE);
 				glTranslatef(0.0, 0.0, -8.5);
 				glScalef(2.0, 2.0, 2.0);
 				SetMaterial(0.1, 0.1, 0.1);
@@ -374,13 +376,13 @@ void DrawObject(GLenum mode) {
 
 
 			// angle3에 관한 회전
+			glLoadName(SHOVELANGLE);
 			glPushMatrix();
 				glTranslatef(15.0, 0.0, 0.0);
 				glRotatef(shovelAngle, 0.0, 0.0, 1.0);
 				// 삽(관절)
 				glScalef(1.5, 1.2, 1.0);
 				glPushMatrix();
-					glLoadName(SHOVELANGLE);
 					glTranslatef(0.0, 0.0, 0.0);
 					glScalef(1.0, 1.0, 15.0);
 					SetMaterial(0.1, 0.1, 0.1);
