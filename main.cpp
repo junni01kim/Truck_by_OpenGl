@@ -602,6 +602,7 @@ void Picking(int x, int y)
 
 
 	// 7. 아이디를 네임스택에 저장하면서 객체그리기
+	SetupCamera();
 	DrawObject(GL_SELECT);
 
 	// 8. 투영 행렬 선택 및 이전 투영행렬 복원
@@ -740,7 +741,8 @@ void DrawScene()
 	glMatrixMode(GL_MODELVIEW);
 
 	// 바닥그리기
-	DrawFloor();	
+	DrawFloor();
+
 	DrawObject(GL_RENDER);
 			
 	// 더블버퍼링을 위한 교환
