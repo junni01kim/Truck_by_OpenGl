@@ -278,12 +278,13 @@ void DrawObject(GLenum mode) {
 			// 유리(하늘색)
 			glTranslatef(0.6, 0.1, 0.0);
 			glScalef(0.3, 0.75, 0.9);
-			SetMaterial(0.0, 3.5, 3.5);
-			glutSolidCube(1.0);
+			glPushMatrix();
+				SetMaterial(0.0, 3.5, 3.5);
+				glutSolidCube(1.0);
+			glPopMatrix();
 
 			glTranslatef(0.0, -0.6, 0.0);
 			glScalef(1.5, 0.4, 1.1);
-			SetMaterial(1.0, 1.0, 0.0);
 			glutSolidCube(1.0);
 		glPopMatrix();
 
@@ -352,12 +353,10 @@ void DrawObject(GLenum mode) {
 			glPushMatrix();
 				glTranslatef(0.0, 0.0, 8.5);
 				glScalef(2.0, 2.0, 2.0);
-				SetMaterial(0.1, 0.1, 0.1);
 				glutSolidCube(1.0);
 				// 팔뚝 추가
 				glTranslatef(4.0, 0.0, 0.0);
 				glScalef(7.5, 1.0, 1.0);
-				SetMaterial(1.0, 1.0, 0.0);
 				glutSolidCube(1.0);
 			glPopMatrix();
 
@@ -365,12 +364,10 @@ void DrawObject(GLenum mode) {
 			glPushMatrix();
 				glTranslatef(0.0, 0.0, -8.5);
 				glScalef(2.0, 2.0, 2.0);
-				SetMaterial(0.1, 0.1, 0.1);
 				glutSolidCube(1.0);
 				// 팔뚝 추가
 				glTranslatef(4.0, 0.0, 0.0);
 				glScalef(7.5, 1.0, 1.0);
-				SetMaterial(1.0, 1.0, 0.0);
 				glutSolidCube(1.0);
 			glPopMatrix();
 
@@ -385,21 +382,18 @@ void DrawObject(GLenum mode) {
 				glPushMatrix();
 					glTranslatef(0.0, 0.0, 0.0);
 					glScalef(1.0, 1.0, 15.0);
-					SetMaterial(0.1, 0.1, 0.1);
 					glutSolidCube(1.0);
 					// 삽 (짙은 회색)
 					// 가로
 					glPushMatrix();
 						glTranslatef(4.0, 0.0, 0.0);
 						glScalef(7.0, 1.0, 1.0);
-						SetMaterial(1.0, 1.0, 0.0);
 						glutSolidCube(1.0);
 					glPopMatrix();
 					// 세로
 					glPushMatrix();
 						glTranslatef(0.0, 3.5, 0.0);
 						glScalef(1.0, 6.0, 1.0);
-						SetMaterial(1.0, 1.0, 0.0);
 						glutSolidCube(1.0);
 					glPopMatrix();
 
@@ -408,7 +402,6 @@ void DrawObject(GLenum mode) {
 					glPushMatrix();
 						glTranslatef(3.5, 3.5, -7.0);
 						glScalef(8.0, 6.0, 1.0);
-						SetMaterial(0.1, 0.1, 0.1);
 						glutSolidCube(1.0);
 					glPopMatrix();
 				glPopMatrix();
@@ -417,159 +410,157 @@ void DrawObject(GLenum mode) {
 	}
 	else {
 		// 테스트 객체 그리기(불도저)
-
-			// 기본 색상(노랑)
-			SetMaterial(1.0, 1.0, 0.0);
-			// 트럭 트렁크
-			glPushMatrix();
+		// 기본 색상(노랑)
+		if (SelectBuffer[3] == BODY) SetMaterial(1.0, 0.0, 0.0);
+		else SetMaterial(1.0, 1.0, 0.0);
+		// 트럭 트렁크
+		glPushMatrix();
 			glTranslatef(-5.0, 12.0, 0.0);
 			glScalef(15.0, 14.0, 15.0);
 			glutSolidCube(1.0);
-			glPopMatrix();
+		glPopMatrix();
 
 			// 트럭 머리
 			glPushMatrix();
-			// 외벽
-			glTranslatef(6.0, 11.0, 0.0);
-			glScalef(8.0, 12.0, 15.0);
-			glutSolidCube(1.0);
+				// 외벽
+				glTranslatef(6.0, 11.0, 0.0);
+				glScalef(8.0, 12.0, 15.0);
+				glutSolidCube(1.0);
 
-			// 유리(하늘색)
-			glTranslatef(0.6, 0.1, 0.0);
-			glScalef(0.3, 0.75, 0.9);
-			SetMaterial(0.0, 3.5, 3.5);
-			glutSolidCube(1.0);
+				// 유리(하늘색)
+				glTranslatef(0.6, 0.1, 0.0);
+				glScalef(0.3, 0.75, 0.9);
+				glPushMatrix();
+					SetMaterial(0.0, 3.5, 3.5);
+					glutSolidCube(1.0);
+				glPopMatrix();
 
-			glTranslatef(0.0, -0.6, 0.0);
-			glScalef(1.5, 0.4, 1.1);
-			SetMaterial(1.0, 1.0, 0.0);
-			glutSolidCube(1.0);
+				glTranslatef(0.0, -0.6, 0.0);
+				glScalef(1.5, 0.4, 1.1);
+				glutSolidCube(1.0);
 			glPopMatrix();
 
 			//바퀴(짙은 회색)
 			// angle2에 관한 회전
 			glPushMatrix();
-			SetMaterial(0.1, 0.1, 0.1);
-			// 앞 바퀴
-			glPushMatrix();
-			glTranslatef(7.0, 5.0, 0);
-			glScalef(1.0, 1.0, 1.0);
-			// 바퀴 우
-			glPushMatrix();
-			glTranslatef(0.0, 0.0, 7.5);
-			glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
-			glutSolidTorus(1.0, 2.0, 100, 100);
-			// 휠
-			glScalef(3.0, 3.0, 1.0);
-			glutSolidCube(1.0);
-			glPopMatrix();
+			if (SelectBuffer[3] == FRONTWHEELANGLE) SetMaterial(1.0, 0.0, 0.0);
+			else SetMaterial(0.1, 0.1, 0.1);
+				// 앞 바퀴
+				glPushMatrix();
+					glTranslatef(7.0, 5.0, 0);
+					glScalef(1.0, 1.0, 1.0);
+					// 바퀴 우
+					glPushMatrix();
+						glTranslatef(0.0, 0.0, 7.5);
+						glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
+						glutSolidTorus(1.0, 2.0, 100, 100);
+						// 휠
+						glScalef(3.0, 3.0, 1.0);
+						glutSolidCube(1.0);
+					glPopMatrix();
 
-			// 바퀴 좌
-			glPushMatrix();
-			glTranslatef(0.0, 0.0, -7.5);
-			glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
-			glutSolidTorus(1.0, 2.0, 100, 100);
-			// 휠
-			glScalef(3.0, 3.0, 1.0);
-			glutSolidCube(1.0);
-			glPopMatrix();
-			glPopMatrix();
+					// 바퀴 좌
+					glPushMatrix();
+						glTranslatef(0.0, 0.0, -7.5);
+						glRotatef(frontWheelAngle, 0.0, 1.0, 0.0);
+						glutSolidTorus(1.0, 2.0, 100, 100);
+						// 휠
+						glScalef(3.0, 3.0, 1.0);
+						glutSolidCube(1.0);
+					glPopMatrix();
+				glPopMatrix();
 			glPopMatrix();
 
 			// angle0에 관한 회전
 			glPushMatrix();
-			SetMaterial(0.1, 0.1, 0.1);
-			glTranslatef(-7.0, 5.0, 0.0);
-			glRotatef(backWheelAngle, 0.0, 0.0, 1.0);
-			// 뒷 바퀴 우(관절)
-			glPushMatrix();
-			glTranslatef(0.0, 0.0, 7.5);
-			glutSolidTorus(1.0, 2.0, 100, 100);
-			// 휠(인데 회전하는 것을 확인하기 위해 우측 만 크기 축소)
-			glScalef(3.0, 3.0, 1.0);
-			glutSolidCube(0.3);
-			glPopMatrix();
+				if (SelectBuffer[3] == BACKWHEELANGLE) SetMaterial(1.0, 0.0, 0.0);
+				else SetMaterial(0.1, 0.1, 0.1);
+				glTranslatef(-7.0, 5.0, 0.0);
+				glRotatef(backWheelAngle, 0.0, 0.0, 1.0);
+				// 뒷 바퀴 우(관절)
+				glPushMatrix();
+					glTranslatef(0.0, 0.0, 7.5);
+					glutSolidTorus(1.0, 2.0, 100, 100);
+					// 휠(인데 회전하는 것을 확인하기 위해 우측 만 크기 축소)
+					glScalef(3.0, 3.0, 1.0);
+					glutSolidCube(0.3);
+				glPopMatrix();
 
-			// 뒷 바퀴 좌(관절)
-			glPushMatrix();
-			glTranslatef(0.0, 0.0, -7.5);
-			glutSolidTorus(1.0, 2.0, 100, 100);
-			// 휠
-			glScalef(3.0, 3.0, 1.0);
-			glutSolidCube(1.0);
-			glPopMatrix();
+				// 뒷 바퀴 좌(관절)
+				glPushMatrix();
+					glTranslatef(0.0, 0.0, -7.5);
+					glutSolidTorus(1.0, 2.0, 100, 100);
+					// 휠
+					glScalef(3.0, 3.0, 1.0);
+					glutSolidCube(1.0);
+				glPopMatrix();
 			glPopMatrix();
 
 			// angle1에 관한 회전
 			glPushMatrix();
-			glTranslatef(5.0, 10.0, 0.0);
-			glRotatef(armAngle, 0.0, 0.0, 1.0);
-			// 팔 우(관절)
-			glPushMatrix();
-			glTranslatef(0.0, 0.0, 8.5);
-			glScalef(2.0, 2.0, 2.0);
-			SetMaterial(0.1, 0.1, 0.1);
-			glutSolidCube(1.0);
-			// 팔뚝 추가
-			glTranslatef(4.0, 0.0, 0.0);
-			glScalef(7.5, 1.0, 1.0);
-			SetMaterial(1.0, 1.0, 0.0);
-			glutSolidCube(1.0);
-			glPopMatrix();
+				if (SelectBuffer[3] == ARMANGLE) SetMaterial(1.0, 0.0, 0.0);
+				else SetMaterial(0.5, 0.5, 0.5);
+				glTranslatef(5.0, 10.0, 0.0);
+				glRotatef(armAngle, 0.0, 0.0, 1.0);
+				// 팔 우(관절)
+				glPushMatrix();
+					glTranslatef(0.0, 0.0, 8.5);
+					glScalef(2.0, 2.0, 2.0);
+					glutSolidCube(1.0);
+					// 팔뚝 추가
+					glTranslatef(4.0, 0.0, 0.0);
+					glScalef(7.5, 1.0, 1.0);
+					glutSolidCube(1.0);
+				glPopMatrix();
 
-			// 팔 좌(관절)
-			glPushMatrix();
-			glTranslatef(0.0, 0.0, -8.5);
-			glScalef(2.0, 2.0, 2.0);
-			SetMaterial(0.1, 0.1, 0.1);
-			glutSolidCube(1.0);
-			// 팔뚝 추가
-			glTranslatef(4.0, 0.0, 0.0);
-			glScalef(7.5, 1.0, 1.0);
-			SetMaterial(1.0, 1.0, 0.0);
-			glutSolidCube(1.0);
-			glPopMatrix();
+				// 팔 좌(관절)
+				glPushMatrix();
+					glTranslatef(0.0, 0.0, -8.5);
+					glScalef(2.0, 2.0, 2.0);
+					glutSolidCube(1.0);
+					// 팔뚝 추가
+					glTranslatef(4.0, 0.0, 0.0);
+					glScalef(7.5, 1.0, 1.0);
+					glutSolidCube(1.0);
+				glPopMatrix();
 
 
-			// angle3에 관한 회전
-			glPushMatrix();
-			glTranslatef(15.0, 0.0, 0.0);
-			glRotatef(shovelAngle, 0.0, 0.0, 1.0);
-			// 삽(관절)
-			glScalef(1.5, 1.2, 1.0);
-			glPushMatrix();
-			glTranslatef(0.0, 0.0, 0.0);
-			glScalef(1.0, 1.0, 15.0);
-			SetMaterial(0.1, 0.1, 0.1);
-			glutSolidCube(1.0);
-			// 삽 (짙은 회색)
-			// 가로
-			glPushMatrix();
-			glTranslatef(4.0, 0.0, 0.0);
-			glScalef(7.0, 1.0, 1.0);
-			SetMaterial(1.0, 1.0, 0.0);
-			glutSolidCube(1.0);
-			glPopMatrix();
-			// 세로
-			glPushMatrix();
-			glTranslatef(0.0, 3.5, 0.0);
-			glScalef(1.0, 6.0, 1.0);
-			SetMaterial(1.0, 1.0, 0.0);
-			glutSolidCube(1.0);
-			glPopMatrix();
+				// angle3에 관한 회전
+				glPushMatrix();
+					if (SelectBuffer[3] == SHOVELANGLE) SetMaterial(1.0, 0.0, 0.0);
+					else SetMaterial(1.0, 1.0, 0.0);
+					glTranslatef(15.0, 0.0, 0.0);
+					glRotatef(shovelAngle, 0.0, 0.0, 1.0);
+					// 삽(관절)
+					glScalef(1.5, 1.2, 1.0);
+					glPushMatrix();
+						glTranslatef(0.0, 0.0, 0.0);
+						glScalef(1.0, 1.0, 15.0);
+						glutSolidCube(1.0);
+						// 삽 (짙은 회색)
+						// 가로
+						glPushMatrix();
+							glTranslatef(4.0, 0.0, 0.0);
+							glScalef(7.0, 1.0, 1.0);
+							glutSolidCube(1.0);
+						glPopMatrix();
+						// 세로
+						glPushMatrix();
+							glTranslatef(0.0, 3.5, 0.0);
+							glScalef(1.0, 6.0, 1.0);
+							glutSolidCube(1.0);
+						glPopMatrix();
 
-			// 외벽(내외 확인을 위해 우측 벽은 생략)
-			glScalef(1.0, 1.0, 1.0 / 15.0); // 사이즈 복구
-			glPushMatrix();
-			glTranslatef(3.5, 3.5, -7.0);
-			glScalef(8.0, 6.0, 1.0);
-			SetMaterial(0.1, 0.1, 0.1);
-			glutSolidCube(1.0);
+						// 외벽(내외 확인을 위해 우측 벽은 생략)
+						glScalef(1.0, 1.0, 1.0 / 15.0); // 사이즈 복구
+						glPushMatrix();
+							glTranslatef(3.5, 3.5, -7.0);
+							glScalef(8.0, 6.0, 1.0);
+							glutSolidCube(1.0);
+					glPopMatrix();
+				glPopMatrix();
 			glPopMatrix();
-
-			glPopMatrix();
-			glPopMatrix();
-			glPopMatrix();
+		glPopMatrix();
 	}
 }
 
